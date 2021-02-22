@@ -1,7 +1,7 @@
 # ImageNet Classification with Weight Excitation (MWE / LWE)
 This project is our implementation of Weight Standardization for ImageNet classification with ResNet and ResNeXt. The project is forked from pytorch-classification.
 
-It is an unofficial implementation of the "Weight Excitation: Built-in Attention Mechanisms in Convolutional Neural Networks" paper. The link is as follows:
+It is an unofficial implementation of the "Weight Excitation: Built-in Attention Mechanisms in Convolutional Neural Networks" paper. The link of the paper is as follows:
 https://link.springer.com/chapter/10.1007%2F978-3-030-58577-8_6
 
 If you find this project helpful, please consider citing our paper.
