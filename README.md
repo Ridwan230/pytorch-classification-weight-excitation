@@ -39,6 +39,6 @@ ResNeXt-101 32x4d:
 python -W ignore imagenet.py -a l_resnext101 --base-width 4 --cardinality 32 --data ~/dataset/ILSVRC2012/ 
 ```
 
-#Contribute
+# Contribute
 Feel free to create a pull request if you find any bugs or you want to contribute (e.g., more datasets and more network structures).
 
