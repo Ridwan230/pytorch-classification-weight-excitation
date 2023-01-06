@@ -9,13 +9,15 @@ import from https://github.com/prlz77/ResNeXt.pytorch/blob/master/models/model.p
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
-
+from .. import layers as L
 __all__ = ['resnext']
+
 
 class ResNeXtBottleneck(nn.Module):
     """
     RexNeXt bottleneck type C (https://github.com/facebookresearch/ResNeXt/blob/master/models/resnext.lua)
     """
+
     def __init__(self, in_channels, out_channels, stride, cardinality, widen_factor):
         """ Constructor
         Args:
@@ -27,17 +29,22 @@ class ResNeXtBottleneck(nn.Module):
         """
         super(ResNeXtBottleneck, self).__init__()
         D = cardinality * out_channels // widen_factor
-        self.conv_reduce = nn.Conv2d(in_channels, D, kernel_size=1, stride=1, padding=0, bias=False)
+        self.conv_reduce = L.Conv2d(
+            in_channels, D, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn_reduce = nn.BatchNorm2d(D)
-        self.conv_conv = nn.Conv2d(D, D, kernel_size=3, stride=stride, padding=1, groups=cardinality, bias=False)
+        self.conv_conv = L.Conv2d(
+            D, D, kernel_size=3, stride=stride, padding=1, groups=cardinality, bias=False)
         self.bn = nn.BatchNorm2d(D)
-        self.conv_expand = nn.Conv2d(D, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
+        self.conv_expand = L.Conv2d(
+            D, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn_expand = nn.BatchNorm2d(out_channels)
 
         self.shortcut = nn.Sequential()
         if in_channels != out_channels:
-            self.shortcut.add_module('shortcut_conv', nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, bias=False))
-            self.shortcut.add_module('shortcut_bn', nn.BatchNorm2d(out_channels))
+            self.shortcut.add_module('shortcut_conv', L.Conv2d(
+                in_channels, out_channels, kernel_size=1, stride=stride, padding=0, bias=False))
+            self.shortcut.add_module(
+                'shortcut_bn', nn.BatchNorm2d(out_channels))
 
     def forward(self, x):
         bottleneck = self.conv_reduce.forward(x)
@@ -55,6 +62,7 @@ class CifarResNeXt(nn.Module):
     ResNext optimized for the Cifar dataset, as specified in
     https://arxiv.org/pdf/1611.05431.pdf
     """
+
     def __init__(self, cardinality, depth, num_classes, widen_factor=4, dropRate=0):
         """ Constructor
         Args:
@@ -70,9 +78,10 @@ class CifarResNeXt(nn.Module):
         self.widen_factor = widen_factor
         self.num_classes = num_classes
         self.output_size = 64
-        self.stages = [64, 64 * self.widen_factor, 128 * self.widen_factor, 256 * self.widen_factor]
+        self.stages = [64, 64 * self.widen_factor, 128 *
+                       self.widen_factor, 256 * self.widen_factor]
 
-        self.conv_1_3x3 = nn.Conv2d(3, 64, 3, 1, 1, bias=False)
+        self.conv_1_3x3 = L.Conv2d(3, 64, 3, 1, 1, bias=False)
         self.bn_1 = nn.BatchNorm2d(64)
         self.stage_1 = self.block('stage_1', self.stages[0], self.stages[1], 1)
         self.stage_2 = self.block('stage_2', self.stages[1], self.stages[2], 2)
@@ -118,6 +127,7 @@ class CifarResNeXt(nn.Module):
         x = F.avg_pool2d(x, 8, 1)
         x = x.view(-1, 1024)
         return self.classifier(x)
+
 
 def resnext(**kwargs):
     """Constructs a ResNeXt.
