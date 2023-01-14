@@ -29,19 +29,19 @@ class ResNeXtBottleneck(nn.Module):
         """
         super(ResNeXtBottleneck, self).__init__()
         D = cardinality * out_channels // widen_factor
-        self.conv_reduce = nn.Conv2d(
+        self.conv_reduce = L.Conv2d(
             in_channels, D, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn_reduce = nn.BatchNorm2d(D)
-        self.conv_conv = nn.Conv2d(
+        self.conv_conv = L.Conv2d(
             D, D, kernel_size=3, stride=stride, padding=1, groups=cardinality, bias=False)
         self.bn = nn.BatchNorm2d(D)
-        self.conv_expand = nn.Conv2d(
+        self.conv_expand = L.Conv2d(
             D, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn_expand = nn.BatchNorm2d(out_channels)
 
         self.shortcut = nn.Sequential()
         if in_channels != out_channels:
-            self.shortcut.add_module('shortcut_conv', nn.Conv2d(
+            self.shortcut.add_module('shortcut_conv', L.Conv2d(
                 in_channels, out_channels, kernel_size=1, stride=stride, padding=0, bias=False))
             self.shortcut.add_module(
                 'shortcut_bn', nn.BatchNorm2d(out_channels))
@@ -81,7 +81,7 @@ class CifarResNeXt(nn.Module):
         self.stages = [64, 64 * self.widen_factor, 128 *
                        self.widen_factor, 256 * self.widen_factor]
 
-        self.conv_1_3x3 = nn.Conv2d(3, 64, 3, 1, 1, bias=False)
+        self.conv_1_3x3 = L.Conv2d(3, 64, 3, 1, 1, bias=False)
         self.bn_1 = nn.BatchNorm2d(64)
         self.stage_1 = self.block('stage_1', self.stages[0], self.stages[1], 1)
         self.stage_2 = self.block('stage_2', self.stages[1], self.stages[2], 2)
