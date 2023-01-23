@@ -140,9 +140,9 @@ def main():
 
     trainset = ImageNetDownSample(
         root=traindir, train=True, transform=transform_train)
-    valset = ImageNetDownSample(valdir, train=False, transform=transform_test)
+    testset = ImageNetDownSample(valdir, train=False, transform=transform_val)
 
-    trainloader = torch.utils.data.DataLoader(
+    train_loader = torch.utils.data.DataLoader(
         trainset, batch_size=args.train_batch, shuffle=True, num_workers=args.workers, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(
         testset, batch_size=args.test_batch, shuffle=False, num_workers=args.workers, pin_memory=True)
@@ -282,9 +282,9 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
-        losses.update(loss.data[0], inputs.size(0))
-        top1.update(prec1[0], inputs.size(0))
-        top5.update(prec5[0], inputs.size(0))
+        losses.update(loss.item(), inputs.size(0))
+        top1.update(prec1.item(), inputs.size(0))
+        top5.update(prec5.item(), inputs.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -341,9 +341,9 @@ def test(val_loader, model, criterion, epoch, use_cuda):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
-        losses.update(loss.data[0], inputs.size(0))
-        top1.update(prec1[0], inputs.size(0))
-        top5.update(prec5[0], inputs.size(0))
+        losses.update(loss.item(), inputs.size(0))
+        top1.update(prec1.item(), inputs.size(0))
+        top5.update(prec5.item(), inputs.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)
