@@ -34,8 +34,7 @@ class Conv2d(nn.Conv2d):
         wght = F.avg_pool2d(weight, weight.size(2))
         wght = F.relu(self.fc1(wght))
         wght = F.sigmoid(self.fc2(wght))
-        skip_weight = weight * wght
-        weight = weight + skip_weight
+        weight = weight * wght
 
         return F.conv2d(x, weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
