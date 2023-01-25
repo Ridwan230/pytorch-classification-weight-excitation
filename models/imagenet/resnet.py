@@ -9,13 +9,13 @@ __all__ = ['ResNet', 'l_resnet18', 'l_resnet34', 'l_resnet50', 'l_resnet101',
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
-    return L.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                    padding=1, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=1, bias=False)
 
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
-    return L.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -24,10 +24,10 @@ class BasicBlock(nn.Module):
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = L.BatchNorm2d(planes)
+        self.bn1 = nn.BatchNorm2d(planes)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes)
-        self.bn2 = L.BatchNorm2d(planes)
+        self.bn2 = nn.BatchNorm2d(planes)
         self.downsample = downsample
         self.stride = stride
 
@@ -56,11 +56,11 @@ class Bottleneck(nn.Module):
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(Bottleneck, self).__init__()
         self.conv1 = conv1x1(inplanes, planes)
-        self.bn1 = L.BatchNorm2d(planes)
+        self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = conv3x3(planes, planes, stride)
-        self.bn2 = L.BatchNorm2d(planes)
+        self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = conv1x1(planes, planes * self.expansion)
-        self.bn3 = L.BatchNorm2d(planes * self.expansion)
+        self.bn3 = nn.BatchNorm2d(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -93,9 +93,9 @@ class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False):
         super(ResNet, self).__init__()
         self.inplanes = 64
-        self.conv1 = L.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
-                              bias=False)
-        self.bn1 = L.BatchNorm2d(64)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
@@ -128,7 +128,7 @@ class ResNet(nn.Module):
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                L.BatchNorm2d(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
