@@ -20,8 +20,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 import models.imagenet as customized_models
-from imagenetLoad import ImageNetDownSample
-
+from imagenetK import ImageNetKaggle
 from utils import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 
 # Models
@@ -121,49 +120,30 @@ def main():
         mkdir_p(args.checkpoint)
 
     # Data loading code
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
+    # traindir = os.path.join(args.data, 'train')
+    # valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
-
-    transform_val = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
-
-    trainset = ImageNetDownSample(
-        root=traindir, train=True, transform=transform_train)
-    testset = ImageNetDownSample(valdir, train=False, transform=transform_val)
-
     train_loader = torch.utils.data.DataLoader(
-        trainset, batch_size=args.train_batch, shuffle=True, num_workers=args.workers, pin_memory=True)
+        ImageNetKaggle(args.data, "train", transforms.Compose([
+            transforms.RandomSizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ])),
+        batch_size=args.train_batch, shuffle=True,
+        num_workers=args.workers, pin_memory=True)
+
     val_loader = torch.utils.data.DataLoader(
-        testset, batch_size=args.test_batch, shuffle=False, num_workers=args.workers, pin_memory=True)
-
-    # train_loader = torch.utils.data.DataLoader(
-    #     datasets.ImageFolder(traindir, transforms.Compose([
-    #         transforms.RandomCrop(32, padding=4),
-    #         transforms.RandomHorizontalFlip(),
-    #         transforms.ToTensor(),
-    #         normalize,
-    #     ])),
-    #     batch_size=args.train_batch, shuffle=True,
-    #     num_workers=args.workers, pin_memory=True)
-
-    # val_loader = torch.utils.data.DataLoader(
-    #     datasets.ImageFolder(valdir, transforms.Compose([
-    #         transforms.ToTensor(),
-    #         normalize,
-    #     ])),
-    #     batch_size=args.test_batch, shuffle=False,
-    #     num_workers=args.workers, pin_memory=True)
+        ImageNetKaggle(args.data, "val", transforms.Compose([
+            transforms.Scale(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ])),
+        batch_size=args.test_batch, shuffle=False,
+        num_workers=args.workers, pin_memory=True)
 
     # create model
     if args.pretrained:
@@ -272,7 +252,7 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         data_time.update(time.time() - end)
 
         if use_cuda:
-            inputs, targets = inputs.cuda(), targets.cuda(non_blocking=True)
+            inputs, targets = inputs.cuda(), targets.cuda(non_blcking=True)
         inputs, targets = torch.autograd.Variable(
             inputs), torch.autograd.Variable(targets)
 
@@ -282,9 +262,9 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
-        losses.update(loss.item(), inputs.size(0))
-        top1.update(prec1.item(), inputs.size(0))
-        top5.update(prec5.item(), inputs.size(0))
+        losses.update(loss.data[0], inputs.size(0))
+        top1.update(prec1[0], inputs.size(0))
+        top5.update(prec5[0], inputs.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -341,9 +321,9 @@ def test(val_loader, model, criterion, epoch, use_cuda):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
-        losses.update(loss.item(), inputs.size(0))
-        top1.update(prec1.item(), inputs.size(0))
-        top5.update(prec5.item(), inputs.size(0))
+        losses.update(loss.data[0], inputs.size(0))
+        top1.update(prec1[0], inputs.size(0))
+        top5.update(prec5[0], inputs.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)
