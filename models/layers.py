@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parameter import Parameter
 from torch.nn import functional as F
-#CBAM
+# CBAM
 class Conv2d(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True):
@@ -17,7 +17,7 @@ class Conv2d(nn.Conv2d):
         #modify
         self.mlp = nn.Sequential(
             nn.Conv2d(planes//groups, max(planes//16,1), kernel_size=1),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(max(planes//16,1), planes//groups, kernel_size=1)
 
             # nn.Linear(in_channels, max(in_channels//ratio,1), bias=False),
@@ -53,7 +53,9 @@ class Conv2d(nn.Conv2d):
        
         wght = torch.sigmoid(wght1+wght2)
 
-        weight = weight * wght
+        skip_1 = weight * wght
+
+        weight = weight + skip_1
         
         
         
@@ -63,7 +65,10 @@ class Conv2d(nn.Conv2d):
         result=torch.cat([max_result,avg_result],1)
         wght_2=self.conv(result)
         wght_2=self.sigmoid(wght_2)
-        weight=weight*wght_2
+
+        skip_2 = weight*wght_2
+
+        weight=weight + skip_1 + skip_2
 #         wght3 = self.avg_pool(weight)
 #         wght4 = self.max_pool(weight)
 #         wght5 = torch.cat([wght3,wght4],1)
