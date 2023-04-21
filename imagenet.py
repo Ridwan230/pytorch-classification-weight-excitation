@@ -120,14 +120,14 @@ def main():
         mkdir_p(args.checkpoint)
 
     # Data loading code
-    # traindir = os.path.join(args.data, 'train')
-    # valdir = os.path.join(args.data, 'val')
+    traindir = os.path.join(args.data, 'train')
+    valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
     train_loader = torch.utils.data.DataLoader(
-        ImageNetDownSample(args.data, "train", transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
+        datasets.ImageFolder(traindir, transforms.Compose([
+            transforms.RandomSizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -136,7 +136,9 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     val_loader = torch.utils.data.DataLoader(
-        ImageNetDownSample(args.data, "val", transforms.Compose([
+        datasets.ImageFolder(valdir, transforms.Compose([
+            transforms.Scale(256),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
         ])),
