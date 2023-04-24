@@ -271,6 +271,48 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         loss.backward()
         optimizer.step()
 
+        count_fc1 = 0
+        count_fc2 = 0
+        all_fc1 = []
+        all_fc2 = []
+        for name, param in model.named_parameters():
+            if 'fc1.weight' in name:
+                all_fc1.append(param)
+            if 'fc2.weight' in name:
+                all_fc2.append(param)
+            if name == 'module.layer1.0.conv1.fc1.weight':
+                actual_val = param[0,0,0,0]
+        stacked_fc1 = torch.stack(all_fc1)
+        averaged_fc1 = torch.mean(stacked_fc1, 0)
+        stacked_fc2 = torch.stack(all_fc2)
+        averaged_fc2 = torch.mean(stacked_fc2, 0)
+        #print(f"Stacked {stacked_fc2[:,0,0,0,0]}, averaged {averaged_fc2[0,0,0,0]}")
+        #print(averaged_fc1.size(), averaged_fc2.size())
+ 
+        #breakpoint()  
+        with torch.no_grad():
+            state_dict = model.state_dict()
+            for name, param in model.named_parameters():
+                if 'fc1.weight' in name:
+                    #print(name)
+                    state_dict[name] = averaged_fc1
+                if 'fc2.weight' in name:
+                    state_dict[name] = averaged_fc2
+        #print(f"Actual val {actual_val}, averaged val {averaged_fc1[0,0,0,0]}, state dict val {state_dict['module.layer1.0.conv1.fc1.weight'][0,0,0,0]}")
+        model.load_state_dict(state_dict)
+        
+        """
+        for name, param in model.named_parameters():
+            if name == 'module.layer1.0.conv1.fc1.weight':
+                print(f"value of updated model param {param[0,0,0,0]}")
+                breakpoint()
+        """
+
+
+
+
+
+
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
