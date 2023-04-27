@@ -24,9 +24,9 @@ from imagenetLoad import ImageNetDownSample
 from utils import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
 
 # Models
-default_model_names = sorted(name for name in models.__dict__
-                             if name.islower() and not name.startswith("__")
-                             and callable(models.__dict__[name]))
+# default_model_names = sorted(name for name in models.__dict__
+#                              if name.islower() and not name.startswith("__")
+#                              and callable(models.__dict__[name]))
 
 customized_models_names = sorted(name for name in customized_models.__dict__
                                  if name.islower() and not name.startswith("__")
@@ -36,7 +36,8 @@ for name in customized_models.__dict__:
     if name.islower() and not name.startswith("__") and callable(customized_models.__dict__[name]):
         models.__dict__[name] = customized_models.__dict__[name]
 
-model_names = default_model_names + customized_models_names
+# model_names = default_model_names + customized_models_names
+model_names = customized_models_names
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -45,6 +46,8 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('-d', '--data', default='path to dataset', type=str)
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
+parser.add_argument('--train-data', default='path to dataset', type=str)
+parser.add_argument('--test-data', default='path to dataset', type=str)
 # Optimization options
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -120,8 +123,12 @@ def main():
         mkdir_p(args.checkpoint)
 
     # Data loading code
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
+    # traindir = os.path.join(args.data, 'train')
+    # valdir = os.path.join(args.data, 'val')
+    traindir = os.path.basename(args.train-data)
+    valdir = os.path.basename(args.test-data)
+
+
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -271,42 +278,42 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         loss.backward()
         optimizer.step()
 
-        count_fc1 = 0
-        count_fc2 = 0
-        all_fc1 = []
-        all_fc2 = []
-        for name, param in model.named_parameters():
-            if 'fc1.weight' in name:
-                all_fc1.append(param)
-            if 'fc2.weight' in name:
-                all_fc2.append(param)
-            if name == 'module.layer1.0.conv1.fc1.weight':
-                actual_val = param[0,0,0,0]
-        stacked_fc1 = torch.stack(all_fc1)
-        averaged_fc1 = torch.mean(stacked_fc1, 0)
-        stacked_fc2 = torch.stack(all_fc2)
-        averaged_fc2 = torch.mean(stacked_fc2, 0)
-        #print(f"Stacked {stacked_fc2[:,0,0,0,0]}, averaged {averaged_fc2[0,0,0,0]}")
-        #print(averaged_fc1.size(), averaged_fc2.size())
+        # count_fc1 = 0
+        # count_fc2 = 0
+        # all_fc1 = []
+        # all_fc2 = []
+        # for name, param in model.named_parameters():
+        #     if 'fc1.weight' in name:
+        #         all_fc1.append(param)
+        #     if 'fc2.weight' in name:
+        #         all_fc2.append(param)
+        #     if name == 'module.layer1.0.conv1.fc1.weight':
+        #         actual_val = param[0,0,0,0]
+        # stacked_fc1 = torch.stack(all_fc1)
+        # averaged_fc1 = torch.mean(stacked_fc1, 0)
+        # stacked_fc2 = torch.stack(all_fc2)
+        # averaged_fc2 = torch.mean(stacked_fc2, 0)
+        # #print(f"Stacked {stacked_fc2[:,0,0,0,0]}, averaged {averaged_fc2[0,0,0,0]}")
+        # #print(averaged_fc1.size(), averaged_fc2.size())
  
-        #breakpoint()  
-        with torch.no_grad():
-            state_dict = model.state_dict()
-            for name, param in model.named_parameters():
-                if 'fc1.weight' in name:
-                    #print(name)
-                    state_dict[name] = averaged_fc1
-                if 'fc2.weight' in name:
-                    state_dict[name] = averaged_fc2
-        #print(f"Actual val {actual_val}, averaged val {averaged_fc1[0,0,0,0]}, state dict val {state_dict['module.layer1.0.conv1.fc1.weight'][0,0,0,0]}")
-        model.load_state_dict(state_dict)
+        # #breakpoint()  
+        # with torch.no_grad():
+        #     state_dict = model.state_dict()
+        #     for name, param in model.named_parameters():
+        #         if 'fc1.weight' in name:
+        #             #print(name)
+        #             state_dict[name] = averaged_fc1
+        #         if 'fc2.weight' in name:
+        #             state_dict[name] = averaged_fc2
+        # #print(f"Actual val {actual_val}, averaged val {averaged_fc1[0,0,0,0]}, state dict val {state_dict['module.layer1.0.conv1.fc1.weight'][0,0,0,0]}")
+        # model.load_state_dict(state_dict)
         
-        """
-        for name, param in model.named_parameters():
-            if name == 'module.layer1.0.conv1.fc1.weight':
-                print(f"value of updated model param {param[0,0,0,0]}")
-                breakpoint()
-        """
+        # """
+        # for name, param in model.named_parameters():
+        #     if name == 'module.layer1.0.conv1.fc1.weight':
+        #         print(f"value of updated model param {param[0,0,0,0]}")
+        #         breakpoint()
+        # """
 
 
 
