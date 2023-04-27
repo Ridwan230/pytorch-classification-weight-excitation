@@ -125,8 +125,8 @@ def main():
     # Data loading code
     # traindir = os.path.join(args.data, 'train')
     # valdir = os.path.join(args.data, 'val')
-    traindir = os.path.basename(args.train-data)
-    valdir = os.path.basename(args.test-data)
+    traindir = os.path.basename(args.train_data)
+    valdir = os.path.basename(args.test_data)
 
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
