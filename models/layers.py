@@ -222,9 +222,9 @@ class Conv2d(nn.Conv2d):
 
         self.count = 0
         planes = in_channels
-        self.fc1 = Conv2d(
+        self.fc1 = nn.Conv2d(
             planes//groups, max(planes//16, 1), kernel_size=1)
-        self.fc2 = Conv2d(
+        self.fc2 = nn.Conv2d(
             max(planes//16, 1), planes//groups, kernel_size=1)
         self.eps = 1e-5
 
