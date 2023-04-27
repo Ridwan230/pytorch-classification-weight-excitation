@@ -123,10 +123,8 @@ def main():
         mkdir_p(args.checkpoint)
 
     # Data loading code
-    # traindir = os.path.join(args.data, 'train')
-    # valdir = os.path.join(args.data, 'val')
-    traindir = os.path.basename(args.train_data)
-    valdir = os.path.basename(args.test_data)
+    traindir = os.path.join(args.data, 'train')
+    valdir = os.path.join(args.data, 'val')
 
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
