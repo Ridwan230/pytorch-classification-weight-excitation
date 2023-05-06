@@ -22,6 +22,7 @@ import torchvision.models as models
 import models.imagenet as customized_models
 from imagenetLoad import ImageNetDownSample
 from utils import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 # Models
 # default_model_names = sorted(name for name in models.__dict__
@@ -175,8 +176,11 @@ def main():
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = optim.SGD(model.parameters(), lr=args.lr,
-                          momentum=args.momentum, weight_decay=args.weight_decay)
+    # optimizer = optim.SGD(model.parameters(), lr=args.lr,
+    #                       momentum=args.momentum, weight_decay=args.weight_decay)
+    ##################################ADAMW###################################
+    optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.1)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1.2)
 
     # Resume
     title = 'ImageNet-' + args.arch
@@ -336,6 +340,9 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         )
         bar.next()
     bar.finish()
+    ###################################ADAMW######################################
+    # Update the learning rate scheduler
+    scheduler.step()
     return (losses.avg, top1.avg)
 
 
