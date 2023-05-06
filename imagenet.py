@@ -211,7 +211,8 @@ def main():
 
     # Train and val
     for epoch in range(start_epoch, args.epochs):
-        adjust_learning_rate(optimizer, epoch)
+        #################################ADAMW########################################
+        # adjust_learning_rate(optimizer, epoch)
 
         print('\nEpoch: [%d | %d] LR: %f' %
               (epoch + 1, args.epochs, state['lr']))
@@ -235,6 +236,9 @@ def main():
             'best_acc': best_acc,
             'optimizer': optimizer.state_dict(),
         }, is_best, checkpoint=args.checkpoint)
+        ###################################ADAMW######################################
+        # Update the learning rate scheduler
+        scheduler.step()
 
     logger.close()
     logger.plot()
@@ -340,9 +344,6 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
         )
         bar.next()
     bar.finish()
-    ###################################ADAMW######################################
-    # Update the learning rate scheduler
-    scheduler.step()
     return (losses.avg, top1.avg)
 
 
