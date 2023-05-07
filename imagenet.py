@@ -179,7 +179,7 @@ def main():
     # optimizer = optim.SGD(model.parameters(), lr=args.lr,
     #                       momentum=args.momentum, weight_decay=args.weight_decay)
     ##################################ADAMW###################################
-    optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.1)
+    optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1)
 
     # Resume
