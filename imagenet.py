@@ -180,7 +180,7 @@ def main():
     #                       momentum=args.momentum, weight_decay=args.weight_decay)
     ##################################ADAMW###################################
     optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.1)
-    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1.2)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1)
 
     # Resume
     title = 'ImageNet-' + args.arch
